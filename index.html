@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <div id="app">
+        <nav-menu></nav-menu>
+    </div>
+    <script>
+        Vue.component('nav-menu', {
+            template:`\
+            <div class="main" v-onoutside="handleClose" @click="testUnbind" v-if="flag">\
+                <button @mouseover="show = !show">点击我显示下拉菜单</button>\
+                <transition name="gradualChange">
+                <div  class="dropdown" v-show="show">\
+                    <p>下拉框内容，点击其他区域消失</p>\
+                </div>\
+            </div>
+            `,
+            data() {
+                return {
+                    show: false,
+                    flag: true
+                }
+            },
+            methods: {
+                handleClose() {
+                    this.show = false
+                },
+                testUnbind() {
+                    this.flag = false;
+                }
+            }
+        });
+        Vue.directive('onoutside', {
+            bind: function(el, binding, vnode) {
+                function documentHandler(e) {
+                    // 判断区域
+                    if(el.contains(e.target)) {
+                        return;
+                    }
+                    // 判断有无回调  有则执行  
+                    if(binding.expression) {
+                        binding.value();
+                    }
+                }
+                el._vueonOutside_ = documentHandler;
+                document.addEventListener('mouseover', documentHandler);
+            },
+            unbind: function (el, binding) {
+                debugger
+                document.removeEventListener('mouseover', el._vueonOutside_);
+                delete el._vueonOutside_;
+            }
+        });
+        let vm = new Vue({
+            el:'#app'
+        })
+    </script>
+</body>
+</html>
